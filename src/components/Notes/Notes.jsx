@@ -32,7 +32,7 @@ import {
 // Component imports
 import BookCard from "../BookCard";
 import NoteEditor from "./NoteEditor";
-import DeleteConfirmation from "./DeleteConfirmation";
+import ConfirmationDialog from "../ConfirmationDialog";
 
 // Main Notes component
 export default function Notes({ sidebarCollapsed }) {
@@ -49,8 +49,9 @@ export default function Notes({ sidebarCollapsed }) {
   const [showFilters, setShowFilters] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
-    noteId: "",
-    noteTitle: "",
+    title: "",
+    message: "",
+    onConfirm: () => {},
   });
   const [expandedNoteId, setExpandedNoteId] = useState(null);
 
@@ -62,7 +63,7 @@ export default function Notes({ sidebarCollapsed }) {
         note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         note.content.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory =
-      selectedCategory === "all" || note.category === selectedCategory;
+        selectedCategory === "all" || note.category === selectedCategory;
       return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {
@@ -92,32 +93,60 @@ export default function Notes({ sidebarCollapsed }) {
     dispatch(updateNote({ id, updates }));
   };
 
-  // Function to open delete confirmation dialog
+  // Function to open delete confirmation dialog for a single note
   const openDeleteDialog = (id, title) => {
     setDeleteDialog({
       open: true,
-      noteId: id,
-      noteTitle: title || "this note",
+      title: "Delete Note",
+      message: `Are you sure you want to delete "${
+        title || "this note"
+      }"? This action cannot be undone.`,
+      onConfirm: () => {
+        dispatch(deleteNote(id));
+        if (expandedNoteId === id) {
+          setExpandedNoteId(null);
+        }
+        setDeleteDialog({
+          open: false,
+          title: "",
+          message: "",
+          onConfirm: () => {},
+        });
+      },
     });
   };
 
-  // Function to confirm note deletion
-  const confirmDelete = () => {
-    dispatch(deleteNote(deleteDialog.noteId));
-    if (expandedNoteId === deleteDialog.noteId) setExpandedNoteId(null);
-    setDeleteDialog({ open: false, noteId: "", noteTitle: "" });
+  // Function to open delete confirmation dialog for multiple notes
+  const openBulkDeleteDialog = () => {
+    setDeleteDialog({
+      open: true,
+      title: "Delete Notes",
+      message: `Are you sure you want to delete ${selectedNotes.length} selected notes? This action cannot be undone.`,
+      onConfirm: () => {
+        dispatch(deleteSelectedNotes());
+        setDeleteDialog({
+          open: false,
+          title: "",
+          message: "",
+          onConfirm: () => {},
+        });
+      },
+    });
+  };
+
+  // Function to close delete dialog
+  const closeDeleteDialog = () => {
+    setDeleteDialog({
+      open: false,
+      title: "",
+      message: "",
+      onConfirm: () => {},
+    });
   };
 
   // Function to toggle note selection
   const handleSelectToggle = (noteId) => {
     dispatch(toggleNoteSelection(noteId));
-  };
-
-  // Function to delete all selected notes
-  const handleDeleteSelected = () => {
-    if (window.confirm(`Delete ${selectedNotes.length} selected notes?`)) {
-      dispatch(deleteSelectedNotes());
-    }
   };
 
   // Get the currently expanded note
@@ -126,16 +155,19 @@ export default function Notes({ sidebarCollapsed }) {
     : null;
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Delete confirmation dialog */}
-      <DeleteConfirmation
-        open={deleteDialog.open}
-        title={deleteDialog.noteTitle}
-        onConfirm={confirmDelete}
-        onCancel={() =>
-          setDeleteDialog({ open: false, noteId: "", noteTitle: "" })
-        }
-      />
+    <div className="h-full flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50 relative">
+      {/* Unified delete confirmation dialog - now positioned fixed to appear as overlay */}
+      {deleteDialog.open && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <ConfirmationDialog
+            open={deleteDialog.open}
+            title={deleteDialog.title}
+            message={deleteDialog.message}
+            onConfirm={deleteDialog.onConfirm}
+            onCancel={closeDeleteDialog}
+          />
+        </div>
+      )}
 
       {/* Header section */}
       <div className="bg-white/80 backdrop-blur-xl border-b border-white/30 p-6 shadow-sm">
@@ -165,7 +197,7 @@ export default function Notes({ sidebarCollapsed }) {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={handleDeleteSelected}
+                    onClick={openBulkDeleteDialog}
                     disabled={selectedNotes.length === 0}
                     className="px-3 py-2 text-sm bg-red-100 text-red-700 rounded-xl hover:bg-red-200 transition-colors disabled:opacity-50"
                   >
@@ -313,6 +345,7 @@ export default function Notes({ sidebarCollapsed }) {
                       isSelected={selectedNotes.includes(note.id)}
                       onSelectToggle={() => handleSelectToggle(note.id)}
                       selectMode={selectMode}
+                      onDelete={() => openDeleteDialog(note.id, note.title)}
                     />
                   );
                 })}

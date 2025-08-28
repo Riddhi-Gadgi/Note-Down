@@ -1,15 +1,46 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const colorOptions = [
-  { color: 'from-blue-400 to-blue-600', text: 'text-gray-800', border: 'border-yellow-300', label: 'Yellow' },
-  { color: 'from-green-400 to-emerald-600', text: 'text-gray-800', border: 'border-pink-300', label: 'Pink' },
-  { color: 'from-purple-400 to-indigo-600', text: 'text-gray-800', border: 'border-blue-300', label: 'Blue' },
-  { color: 'from-orange-400 to-pink-500', text: 'text-gray-800', border: 'border-green-300', label: 'Green' },
-  { color: 'from-pink-400 to-rose-500', text: 'text-gray-800', border: 'border-purple-300', label: 'Purple' },
-  { color: 'from-gray-700 to-gray-900', text: 'text-gray-100', border: 'border-gray-600', label: 'Dark' },
+  {
+    color: "from-blue-400 to-blue-600",
+    text: "text-gray-800",
+    border: "border-blue-300",
+    label: "Blue",
+  },
+  {
+    color: "from-green-400 to-emerald-600",
+    text: "text-gray-800",
+    border: "border-emerald-800",
+    label: "Green",
+  },
+  {
+    color: "from-purple-400 to-indigo-600",
+    text: "text-gray-800",
+    border: "border-blue-300",
+    label: "Blue",
+  },
+  {
+    color: "from-orange-400 to-pink-500",
+    text: "text-gray-800",
+    border: "border-orange-300",
+    label: "Orange",
+  },
+  {
+    color: "from-pink-400 to-rose-500",
+    text: "text-gray-800",
+    border: "border-purple-300",
+    label: "Purple",
+  },
+  {
+    color: "from-gray-700 to-gray-900",
+    text: "text-gray-100",
+    border: "border-gray-600",
+    label: "Dark",
+  },
 ];
 
-const getRandomColor = () => colorOptions[Math.floor(Math.random() * colorOptions.length)];
+const getRandomColor = () =>
+  colorOptions[Math.floor(Math.random() * colorOptions.length)];
 
 const initialNotes = [
   {
@@ -19,7 +50,7 @@ const initialNotes = [
       "Quick notes, simple notes, memo pad! This is your digital notebook...",
     category: "personal",
     isPinned: true,
-    color: "from-blue-400 to-blue-600",  // Ocean Blue
+    color: "from-blue-400 to-blue-600", // Ocean Blue
     textColor: "text-gray-100",
     borderColor: "border-blue-300",
     createdAt: new Date().toISOString(),
@@ -41,8 +72,7 @@ const initialNotes = [
   {
     id: "3",
     title: "Feature Ideas",
-    content:
-      "Voice notes, calendar integration, PDF export, sticky widgets...",
+    content: "Voice notes, calendar integration, PDF export, sticky widgets...",
     category: "ideas",
     isPinned: false,
     color: "from-purple-400 to-indigo-600", // Purple Dream
@@ -92,55 +122,61 @@ const initialNotes = [
 
 const initialState = {
   notes: initialNotes,
-  searchQuery: '',
+  searchQuery: "",
   selectedNotes: [],
   selectMode: false,
-  viewMode: 'grid', // grid, list, calendar
-  sortBy: 'updatedAt', // updatedAt, createdAt, title, category
-  sortOrder: 'desc', // asc, desc
-  filterBy: 'all', // all, pinned, category
+  viewMode: "grid", // grid, list, calendar
+  sortBy: "updatedAt", // updatedAt, createdAt, title, category
+  sortOrder: "desc", // asc, desc
+  filterBy: "all", // all, pinned, category
 };
 
 const notesSlice = createSlice({
-  name: 'notes',
+  name: "notes",
   initialState,
   reducers: {
     addNote: {
-  reducer: (state, action) => {
-    state.notes.unshift(action.payload);
-  },
-  prepare: () => {
-    const randomColor = getRandomColor();
-    return {
-      payload: {
-        id: Date.now().toString(),
-        title: '',
-        content: '',
-        category: 'personal',
-        isPinned: false,
-        ...randomColor,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },}},
+      reducer: (state, action) => {
+        state.notes.unshift(action.payload);
+      },
+      prepare: () => {
+        const randomColor = getRandomColor();
+        return {
+          payload: {
+            id: Date.now().toString(),
+            title: "",
+            content: "",
+            category: "personal",
+            isPinned: false,
+            ...randomColor,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        };
+      },
     },
     updateNote: (state, action) => {
       const { id, updates } = action.payload;
-      const note = state.notes.find(n => n.id === id);
+      const note = state.notes.find((n) => n.id === id);
       if (note) {
         Object.assign(note, updates, { updatedAt: new Date().toISOString() });
       }
     },
     deleteNote: (state, action) => {
-      state.notes = state.notes.filter(note => note.id !== action.payload);
-      state.selectedNotes = state.selectedNotes.filter(id => id !== action.payload);
+      state.notes = state.notes.filter((note) => note.id !== action.payload);
+      state.selectedNotes = state.selectedNotes.filter(
+        (id) => id !== action.payload
+      );
     },
     deleteSelectedNotes: (state) => {
-      state.notes = state.notes.filter(note => !state.selectedNotes.includes(note.id));
+      state.notes = state.notes.filter(
+        (note) => !state.selectedNotes.includes(note.id)
+      );
       state.selectedNotes = [];
       state.selectMode = false;
     },
     togglePin: (state, action) => {
-      const note = state.notes.find(n => n.id === action.payload);
+      const note = state.notes.find((n) => n.id === action.payload);
       if (note) {
         note.isPinned = !note.isPinned;
         note.updatedAt = new Date().toISOString();
@@ -158,13 +194,13 @@ const notesSlice = createSlice({
     toggleNoteSelection: (state, action) => {
       const noteId = action.payload;
       if (state.selectedNotes.includes(noteId)) {
-        state.selectedNotes = state.selectedNotes.filter(id => id !== noteId);
+        state.selectedNotes = state.selectedNotes.filter((id) => id !== noteId);
       } else {
         state.selectedNotes.push(noteId);
       }
     },
     selectAllNotes: (state) => {
-      state.selectedNotes = state.notes.map(note => note.id);
+      state.selectedNotes = state.notes.map((note) => note.id);
     },
     deselectAllNotes: (state) => {
       state.selectedNotes = [];
@@ -184,12 +220,12 @@ const notesSlice = createSlice({
   },
 });
 
-export const { 
-  addNote, 
-  updateNote, 
-  deleteNote, 
+export const {
+  addNote,
+  updateNote,
+  deleteNote,
   deleteSelectedNotes,
-  togglePin, 
+  togglePin,
   setSearchQuery,
   toggleSelectMode,
   toggleNoteSelection,
@@ -198,7 +234,7 @@ export const {
   setViewMode,
   setSortBy,
   setSortOrder,
-  setFilterBy
+  setFilterBy,
 } = notesSlice.actions;
 
 export { colorOptions };

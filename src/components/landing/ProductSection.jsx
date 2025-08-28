@@ -1,12 +1,5 @@
 import { motion } from "framer-motion";
-import {
-  FileText,
-  Brain,
-  Calendar,
-  FolderOpen,
-  Search,
-  Zap,
-} from "lucide-react";
+import { FileText, Calendar, FolderOpen, Search, Zap } from "lucide-react";
 
 const ProductSection = () => {
   const features = [
@@ -15,48 +8,45 @@ const ProductSection = () => {
       title: "Smart Notes",
       description:
         "Create rich, formatted notes with images, links, and tags. Google Keep style interface for quick capture.",
-      color: "bg-blue-500",
-    },
-    {
-      icon: Brain,
-      title: "Mind Maps",
-      description:
-        "Visualize your ideas with interactive mind maps. Connect thoughts and see the bigger picture.",
-      color: "bg-purple-500",
+      gradient: "from-blue-500 to-indigo-500",
     },
     {
       icon: Calendar,
       title: "Calendar View",
       description:
         "See your notes organized by date. Never lose track of when you captured that important idea.",
-      color: "bg-green-500",
+      gradient: "from-green-500 to-emerald-500",
     },
     {
       icon: FolderOpen,
       title: "Categories",
       description:
         "Organize notes with custom categories and colors. Keep everything structured and findable.",
-      color: "bg-orange-500",
+      gradient: "from-orange-500 to-amber-500",
     },
     {
       icon: Search,
       title: "Powerful Search",
       description:
         "Find any note instantly with our advanced search. Search by content, tags, or categories.",
-      color: "bg-red-500",
+      gradient: "from-red-500 to-pink-500",
     },
     {
       icon: Zap,
       title: "Lightning Fast",
       description:
         "Built for speed. Create, edit, and find notes in milliseconds. No waiting, just productivity.",
-      color: "bg-yellow-500",
+      gradient: "from-yellow-500 to-orange-400",
     },
   ];
 
   return (
-    <section id="product" className="py-20 bg-white">
+    <section
+      id="product"
+      className="py-20 bg-gradient-to-b from-gray-50 to-white"
+    >
       <div className="max-w-7xl mx-auto px-6">
+        {/* Heading */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -71,14 +61,16 @@ const ProductSection = () => {
               Every Need
             </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            From simple notes to complex mind maps, Note Down provides all the
-            tools you need to capture, organize, and connect your ideas.
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            From simple notes to organized planning, Note Down provides all the
+            tools you need to capture, structure, and connect your ideas.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
+        {/* Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {/* First 3 features */}
+          {features.slice(0, 3).map((feature, index) => (
             <motion.div
               key={feature.title}
               initial={{ opacity: 0, y: 30 }}
@@ -87,21 +79,49 @@ const ProductSection = () => {
               viewport={{ once: true }}
               className="flex"
             >
-              <div
-                className={`bg-gray-50 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow   duration-300 h-full w-full hover:bg-white `}
-              >
+              <div className="bg-white/70 backdrop-blur-md border border-gray-100 p-6 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 w-full">
                 <div
-                  className={`${feature.color} rounded-full p-3 inline-block`}
+                  className={`bg-gradient-to-r ${feature.gradient} rounded-xl p-3 inline-flex items-center justify-center shadow-md`}
                 >
-                  <feature.icon className="text-white w-6 h-6" />
+                  <feature.icon className="text-white w-7 h-7" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mt-4 mb-2">
+                <h3 className="text-xl font-semibold text-gray-900 mt-5 mb-2">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600">{feature.description}</p>
+                <p className="text-gray-600 leading-relaxed">
+                  {feature.description}
+                </p>
               </div>
             </motion.div>
           ))}
+
+          {/* Last 2 features centered */}
+          <div className="col-span-1 md:col-span-2 lg:col-span-3 flex justify-center gap-10">
+            {features.slice(3).map((feature, index) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: (index + 3) * 0.1 }}
+                viewport={{ once: true }}
+                className="flex max-w-sm"
+              >
+                <div className="bg-white/70 backdrop-blur-md border border-gray-100 p-6 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 w-full">
+                  <div
+                    className={`bg-gradient-to-r ${feature.gradient} rounded-xl p-3 inline-flex items-center justify-center shadow-md`}
+                  >
+                    <feature.icon className="text-white w-7 h-7" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mt-5 mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

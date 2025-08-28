@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   MoreVertical,
   Trash2,
@@ -10,7 +10,7 @@ import {
   Bookmark,
 } from "lucide-react";
 import { useAppDispatch } from "../hooks/useAppDispatch";
-import { togglePin, deleteNote } from "../store/notesSlice";
+import { togglePin } from "../store/notesSlice";
 
 export default function BookCard({
   note,
@@ -19,6 +19,7 @@ export default function BookCard({
   isSelected,
   onSelectToggle,
   selectMode,
+  onDelete, // Add this prop to handle delete requests
 }) {
   const [hovered, setHovered] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -38,12 +39,11 @@ export default function BookCard({
     setMenuOpen(false);
   };
 
-  const handleDelete = (e) => {
+  const handleDeleteClick = (e) => {
     e.stopPropagation();
-    if (window.confirm("Are you sure you want to delete this note?")) {
-      dispatch(deleteNote(note.id));
-    }
     setMenuOpen(false);
+    // Call the parent's delete handler instead of showing dialog here
+    onDelete(note.id, note.title);
   };
 
   return (
@@ -93,14 +93,14 @@ export default function BookCard({
 
       {/* Pinned indicator */}
       {note.isPinned && (
-        <div className="absolute top-0 right-1 z-40">
-          <Bookmark className="w-5 h-5 text-gray-100 fill-gray-200" />
+        <div className="absolute top-1 right-2 z-40">
+          <Bookmark className="w-5 h-5 text-gray-100 " />
         </div>
       )}
 
       {/* Select checkbox */}
       {(hovered || selectMode) && (
-        <div className="absolute top-2 left-2 z-50">
+        <div className="absolute bottom-2 right-2 z-50">
           <motion.button
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -124,7 +124,7 @@ export default function BookCard({
 
       {/* More menu */}
       {hovered && !selectMode && (
-        <div className="absolute bottom-2 right-2 z-50">
+        <div className="absolute bottom-10 right-2 z-50">
           <div className="relative">
             <motion.button
               initial={{ scale: 0 }}
@@ -133,49 +133,62 @@ export default function BookCard({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                setMenuOpen(!menuOpen);
+                setMenuOpen((s) => !s);
               }}
               className="p-1 bg-white/90 backdrop-blur-sm rounded-full border border-white/30 shadow-sm hover:bg-white transition-colors"
+              aria-haspopup="true"
+              aria-expanded={menuOpen}
+              aria-label="Open more menu"
             >
               <MoreVertical className="w-4 h-4 text-gray-600" />
             </motion.button>
 
-            {menuOpen && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8, y: -10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.8, y: -10 }}
-                onClick={(e) => e.stopPropagation()}
-                className="absolute -top-20 mb-2 w-32 bg-white/95 backdrop-blur-xl rounded-xl shadow-xl border border-white/30 overflow-hidden z-60"
-              >
-                <button
-                  onClick={handlePin}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2 text-sm transition-colors"
+            <AnimatePresence>
+              {menuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8, y: -10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, y: -10 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="absolute -top-20 mb-2 w-36 bg-white/95 backdrop-blur-xl rounded-xl shadow-xl border border-white/30 overflow-hidden z-[60]"
+                  role="menu"
                 >
-                  <Pin className="w-4 h-4" />
-                  {note.isPinned ? "Unpin" : "Pin"}
-                </button>
+                  <button
+                    onClick={handlePin}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2 text-sm transition-colors"
+                    role="menuitem"
+                    type="button"
+                  >
+                    <Pin className="w-4 h-4" />
+                    {note.isPinned ? "Unpin" : "Pin"}
+                  </button>
 
-                <button
-                  onClick={() => {
-                    onExpand(note.id);
-                    setMenuOpen(false);
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2 text-sm transition-colors"
-                >
-                  <Edit className="w-4 h-4" />
-                  Edit
-                </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onExpand(note.id);
+                      setMenuOpen(false);
+                    }}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2 text-sm transition-colors"
+                    role="menuitem"
+                    type="button"
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit
+                  </button>
 
-                <button
-                  onClick={handleDelete}
-                  className="w-full text-left px-3 py-2 hover:bg-red-50 flex items-center gap-2 text-sm text-red-600 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Delete
-                </button>
-              </motion.div>
-            )}
+                  <button
+                    onClick={handleDeleteClick}
+                    className="w-full text-left px-3 py-2 hover:bg-red-50 flex items-center gap-2 text-sm text-red-600 transition-colors"
+                    role="menuitem"
+                    type="button"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       )}
