@@ -1,12 +1,27 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-import { useAppSelector } from '../../hooks/useAppSelector';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Calendar as CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+} from "lucide-react";
+import { useAppSelector } from "../../hooks/useAppSelector";
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 export default function Calendar() {
@@ -23,31 +38,31 @@ export default function Calendar() {
     const startingDayOfWeek = firstDay.getDay();
 
     const days = [];
-    
+
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
-    
+
     // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(new Date(year, month, day));
     }
-    
+
     return days;
   };
 
   const getNotesForDate = (date) => {
     if (!date) return [];
     const dateStr = date.toDateString();
-    return notes.filter(note => {
+    return notes.filter((note) => {
       const noteDate = new Date(note.createdAt).toDateString();
       return noteDate === dateStr;
     });
   };
 
   const navigateMonth = (direction) => {
-    setCurrentDate(prev => {
+    setCurrentDate((prev) => {
       const newDate = new Date(prev);
       newDate.setMonth(prev.getMonth() + direction);
       return newDate;
@@ -74,9 +89,7 @@ export default function Calendar() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Calendar
-              </h1>
+              <h1 className="text-3xl font-bold text-black">Calendar</h1>
               <p className="text-gray-500 mt-1">View your notes by date</p>
             </div>
           </div>
@@ -114,8 +127,11 @@ export default function Calendar() {
           <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 overflow-hidden">
             {/* Days of week header */}
             <div className="grid grid-cols-7 border-b border-gray-200/50">
-              {DAYS.map(day => (
-                <div key={day} className="p-4 text-center font-medium text-gray-600 bg-gray-50/50">
+              {DAYS.map((day) => (
+                <div
+                  key={day}
+                  className="p-4 text-center font-medium text-gray-600 bg-gray-50/50"
+                >
                   {day}
                 </div>
               ))}
@@ -125,7 +141,7 @@ export default function Calendar() {
             <div className="grid grid-cols-7">
               {days.map((date, index) => {
                 const dayNotes = getNotesForDate(date);
-                
+
                 return (
                   <motion.div
                     key={index}
@@ -133,29 +149,38 @@ export default function Calendar() {
                     onClick={() => date && setSelectedDate(date)}
                     className={`
                       h-24 p-2 border-b border-r border-gray-200/50 cursor-pointer transition-all duration-200
-                      ${date ? 'hover:bg-blue-50/50' : ''}
-                      ${isToday(date) ? 'bg-blue-100/50 border-blue-300' : ''}
-                      ${isSelected(date) ? 'bg-purple-100/50 border-purple-300' : ''}
+                      ${date ? "hover:bg-blue-50/50" : ""}
+                      ${isToday(date) ? "bg-blue-100/50 border-blue-300" : ""}
+                      ${
+                        isSelected(date)
+                          ? "bg-purple-100/50 border-purple-300"
+                          : ""
+                      }
                     `}
                   >
                     {date && (
                       <>
-                        <div className={`text-sm font-medium mb-1 ${
-                          isToday(date) ? 'text-blue-600' : 
-                          isSelected(date) ? 'text-purple-600' : 'text-gray-700'
-                        }`}>
+                        <div
+                          className={`text-sm font-medium mb-1 ${
+                            isToday(date)
+                              ? "text-blue-600"
+                              : isSelected(date)
+                              ? "text-purple-600"
+                              : "text-gray-700"
+                          }`}
+                        >
                           {date.getDate()}
                         </div>
-                        
+
                         {dayNotes.length > 0 && (
                           <div className="space-y-1">
-                            {dayNotes.slice(0, 2).map(note => (
+                            {dayNotes.slice(0, 2).map((note) => (
                               <div
                                 key={note.id}
                                 className="text-xs p-1 bg-white/60 rounded border border-white/30 truncate"
-                                title={note.title || 'Untitled'}
+                                title={note.title || "Untitled"}
                               >
-                                {note.title || 'Untitled'}
+                                {note.title || "Untitled"}
                               </div>
                             ))}
                             {dayNotes.length > 2 && (
@@ -185,24 +210,28 @@ export default function Calendar() {
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">
                   Notes for {selectedDate.toLocaleDateString()}
                 </h3>
-                
+
                 {getNotesForDate(selectedDate).length > 0 ? (
                   <div className="space-y-3">
-                    {getNotesForDate(selectedDate).map(note => (
+                    {getNotesForDate(selectedDate).map((note) => (
                       <div
                         key={note.id}
                         className="p-4 bg-white/60 rounded-2xl border border-white/30"
                       >
                         <h4 className="font-medium text-gray-800 mb-1">
-                          {note.title || 'Untitled'}
+                          {note.title || "Untitled"}
                         </h4>
                         <p className="text-sm text-gray-600 line-clamp-2">
-                          {note.content || 'No content'}
+                          {note.content || "No content"}
                         </p>
                         <div className="flex items-center gap-2 mt-2">
-                          <span className={`w-2 h-2 rounded-full ${note.color || 'bg-blue-500'}`} />
+                          <span
+                            className={`w-2 h-2 rounded-full ${
+                              note.color || "bg-blue-500"
+                            }`}
+                          />
                           <span className="text-xs text-gray-500">
-                            {note.category || 'Personal'}
+                            {note.category || "Personal"}
                           </span>
                         </div>
                       </div>

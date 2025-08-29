@@ -33,6 +33,11 @@ import {
 import BookCard from "../BookCard";
 import NoteEditor from "./NoteEditor";
 import ConfirmationDialog from "../ConfirmationDialog";
+import {
+  incrementNoteCount,
+  decrementNoteCount,
+  moveNoteBetweenCategories,
+} from "../../store/categoriesSlice";
 
 // Main Notes component
 export default function Notes({ sidebarCollapsed }) {
@@ -77,10 +82,11 @@ export default function Notes({ sidebarCollapsed }) {
 
   // Function to create a new note
   const createNewNote = () => {
-    console.log("Created");
     const action = dispatch(addNote());
-    console.log(action);
-    setExpandedNoteId(action.payload);
+    const newNote = action.payload;
+    // Increment note count for the default category
+    dispatch(incrementNoteCount({ categoryId: newNote.category }));
+    setExpandedNoteId(newNote.id);
   };
 
   // Function to pin/unpin a note
@@ -95,6 +101,7 @@ export default function Notes({ sidebarCollapsed }) {
 
   // Function to open delete confirmation dialog for a single note
   const openDeleteDialog = (id, title) => {
+    const noteToDelete = notes.find((note) => note.id === id);
     setDeleteDialog({
       open: true,
       title: "Delete Note",
@@ -102,6 +109,8 @@ export default function Notes({ sidebarCollapsed }) {
         title || "this note"
       }"? This action cannot be undone.`,
       onConfirm: () => {
+        // Decrement note count for the category
+        dispatch(decrementNoteCount({ categoryId: noteToDelete.category }));
         dispatch(deleteNote(id));
         if (expandedNoteId === id) {
           setExpandedNoteId(null);
@@ -345,7 +354,7 @@ export default function Notes({ sidebarCollapsed }) {
                       isSelected={selectedNotes.includes(note.id)}
                       onSelectToggle={() => handleSelectToggle(note.id)}
                       selectMode={selectMode}
-                      onDelete={() => openDeleteDialog(note.id, note.title)}
+                      onDelete={() => openDeleteDialog(note.id, note.title)} // This line changed
                     />
                   );
                 })}
